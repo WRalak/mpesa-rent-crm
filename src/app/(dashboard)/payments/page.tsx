@@ -5,6 +5,7 @@ import { apiGet } from "@/services/api-client";
 import { useMpesaPayment } from "@/hooks/useMpesaPayment";
 import type { TenantDto } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
+import { PageShell, SectionCard } from "@/components/ui/page-shell";
 
 type Payment = {
   id: string;
@@ -50,12 +51,16 @@ export default function PaymentsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-2xl font-semibold">Payments</h1>
-      <p className="text-sm text-gray-600 mt-1">Trigger STK push and track statuses.</p>
-
-      <section className="mt-6 rounded-lg border p-4">
-        <h2 className="font-medium">Initiate M-Pesa Payment</h2>
+    <PageShell
+      title="Payments"
+      description="Trigger M-Pesa STK pushes and track payment status."
+      actions={
+        <button onClick={() => void load()} className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50">
+          Refresh Data
+        </button>
+      }
+    >
+      <SectionCard title="Initiate M-Pesa Payment">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
           <select
             value={tenantId}
@@ -94,17 +99,14 @@ export default function PaymentsPage() {
             className="rounded-md border px-3 py-2"
           />
         </div>
-        <button onClick={initiate} className="mt-3 rounded-md bg-black text-white px-4 py-2">
+        <button onClick={initiate} className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800">
           {loading ? "Sending..." : "Send STK Push"}
-        </button>
-        <button onClick={() => void load()} className="mt-3 ml-2 rounded-md border px-4 py-2">
-          Refresh Data
         </button>
         {msg ? <p className="mt-2 text-sm">{msg}</p> : null}
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-      </section>
+      </SectionCard>
 
-      <section className="mt-6 rounded-lg border p-4 overflow-auto">
+      <SectionCard title="Recent Payments" className="overflow-auto">
         <h2 className="font-medium mb-3">Recent Payments</h2>
         <table className="w-full text-sm">
           <thead>
@@ -128,7 +130,7 @@ export default function PaymentsPage() {
             ))}
           </tbody>
         </table>
-      </section>
-    </main>
+      </SectionCard>
+    </PageShell>
   );
 }

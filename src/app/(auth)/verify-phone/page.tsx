@@ -44,18 +44,19 @@ function VerifyPhoneContent() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-8">
-      <h1 className="text-2xl font-semibold">Verify Phone</h1>
-      <p className="text-sm text-gray-600 mt-1">Complete OTP verification.</p>
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center p-6">
+      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h1 className="text-2xl font-semibold text-slate-900">Verify Phone Number</h1>
+      <p className="text-sm text-slate-600 mt-1">Complete OTP verification to secure your account.</p>
       <input
         type="tel"
         inputMode="numeric"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         placeholder="2547XXXXXXXX"
-        className="mt-4 w-full rounded-md border px-3 py-2"
+        className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2"
       />
-      <button onClick={sendOtp} className="mt-3 rounded-md bg-black text-white px-4 py-2">
+      <button onClick={sendOtp} className="mt-3 rounded-lg bg-slate-900 text-white px-4 py-2 hover:bg-slate-800">
         Send OTP
       </button>
 
@@ -65,21 +66,22 @@ function VerifyPhoneContent() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="6-digit code"
-            className="mt-4 w-full rounded-md border px-3 py-2"
+            className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2"
           />
-          <button onClick={verifyOtp} className="mt-3 rounded-md bg-black text-white px-4 py-2">
+          <button onClick={verifyOtp} className="mt-3 rounded-lg bg-slate-900 text-white px-4 py-2 hover:bg-slate-800">
             Verify
           </button>
         </>
       ) : null}
 
-      {message ? <p className="mt-3 text-sm">{message}</p> : null}
-      <p className="mt-3 text-sm">
+      {message ? <p className="mt-3 text-sm text-slate-700">{message}</p> : null}
+      <p className="mt-4 text-sm text-slate-600">
         Back to{" "}
-        <Link className="underline" href="/login">
+        <Link className="font-medium text-slate-900 underline" href="/login">
           login
         </Link>
       </p>
+      </section>
     </main>
   );
 }
