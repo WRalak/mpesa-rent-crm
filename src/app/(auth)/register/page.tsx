@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import Link from "next/link";
 
 export default function RegisterPage() {
   async function register(formData: FormData) {
@@ -8,8 +9,8 @@ export default function RegisterPage() {
     const phone = String(formData.get("phone") ?? "").replace(/\D/g, "");
     const email = String(formData.get("email") ?? "");
 
-    if (!name || !phone) {
-      return;
+    if (!name || phone.length < 10) {
+      redirect("/register");
     }
 
     await db.user.upsert({
@@ -23,7 +24,7 @@ export default function RegisterPage() {
       },
     });
 
-    redirect("/login");
+    redirect(`/verify-phone?phone=${encodeURIComponent(phone)}`);
   }
 
   return (
@@ -33,10 +34,23 @@ export default function RegisterPage() {
 
       <form action={register} className="mt-6 space-y-3">
         <input name="name" placeholder="Full name" className="w-full rounded-md border px-3 py-2" required />
-        <input name="phone" placeholder="2547XXXXXXXX" className="w-full rounded-md border px-3 py-2" required />
+        <input
+          name="phone"
+          type="tel"
+          inputMode="numeric"
+          placeholder="2547XXXXXXXX"
+          className="w-full rounded-md border px-3 py-2"
+          required
+        />
         <input name="email" type="email" placeholder="Email (optional)" className="w-full rounded-md border px-3 py-2" />
         <button className="w-full rounded-md bg-black text-white px-3 py-2">Create Account</button>
       </form>
+      <p className="mt-3 text-sm">
+        Already have an account?{" "}
+        <Link className="underline" href="/login">
+          Login
+        </Link>
+      </p>
     </main>
   );
 }

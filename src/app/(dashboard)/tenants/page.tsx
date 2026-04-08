@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Tenant = {
   id: string;
@@ -36,10 +36,6 @@ export default function TenantsPage() {
     }
   }
 
-  useEffect(() => {
-    void loadData();
-  }, []);
-
   async function createTenant() {
     setMessage("");
     const res = await fetch("/api/tenants", {
@@ -72,6 +68,9 @@ export default function TenantsPage() {
   return (
     <main className="mx-auto max-w-4xl p-6">
       <h1 className="text-2xl font-semibold">Tenants</h1>
+      <button onClick={() => void loadData()} className="mt-3 rounded-md border px-4 py-2">
+        Load Tenants & Properties
+      </button>
 
       <section className="mt-4 rounded-lg border p-4">
         <h2 className="font-medium">Add Tenant</h2>
@@ -103,6 +102,7 @@ export default function TenantsPage() {
           />
           <select
             value={propertyId}
+            aria-label="Select property"
             onChange={(e) => setPropertyId(e.target.value)}
             className="rounded-md border px-3 py-2"
           >

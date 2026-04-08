@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Tenant = {
   id: string;
@@ -35,18 +35,6 @@ export default function PaymentsPage() {
     if (pRes.ok) setPayments((await pRes.json()) as Payment[]);
   }
 
-  useEffect(() => {
-    void load();
-  }, []);
-
-  useEffect(() => {
-    const selected = tenants.find((t) => t.id === tenantId);
-    if (selected) {
-      setPhone(selected.phone);
-      setAmount(selected.rentAmount);
-    }
-  }, [tenantId, tenants]);
-
   async function initiate() {
     setMsg("");
     const res = await fetch("/api/mpesa/stkpush", {
@@ -73,7 +61,16 @@ export default function PaymentsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
           <select
             value={tenantId}
-            onChange={(e) => setTenantId(e.target.value)}
+            aria-label="Select tenant"
+            onChange={(e) => {
+              const nextTenantId = e.target.value;
+              setTenantId(nextTenantId);
+              const selected = tenants.find((t) => t.id === nextTenantId);
+              if (selected) {
+                setPhone(selected.phone);
+                setAmount(selected.rentAmount);
+              }
+            }}
             className="rounded-md border px-3 py-2"
           >
             <option value="">Select tenant</option>
@@ -83,9 +80,17 @@ export default function PaymentsPage() {
               </option>
             ))}
           </select>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-md border px-3 py-2" />
+          <input
+            aria-label="Phone number"
+            placeholder="2547XXXXXXXX"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="rounded-md border px-3 py-2"
+          />
           <input
             type="number"
+            aria-label="Amount"
+            placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
             className="rounded-md border px-3 py-2"
@@ -93,6 +98,9 @@ export default function PaymentsPage() {
         </div>
         <button onClick={initiate} className="mt-3 rounded-md bg-black text-white px-4 py-2">
           Send STK Push
+        </button>
+        <button onClick={() => void load()} className="mt-3 ml-2 rounded-md border px-4 py-2">
+          Refresh Data
         </button>
         {msg ? <p className="mt-2 text-sm">{msg}</p> : null}
       </section>

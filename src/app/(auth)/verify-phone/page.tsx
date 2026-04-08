@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VerifyPhonePage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const params = useSearchParams();
+  const [phone, setPhone] = useState(() => params.get("phone") ?? "");
   const [code, setCode] = useState("");
   const [requested, setRequested] = useState(false);
   const [message, setMessage] = useState("");
@@ -46,6 +48,8 @@ export default function VerifyPhonePage() {
       <h1 className="text-2xl font-semibold">Verify Phone</h1>
       <p className="text-sm text-gray-600 mt-1">Complete OTP verification.</p>
       <input
+        type="tel"
+        inputMode="numeric"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         placeholder="2547XXXXXXXX"
@@ -70,6 +74,12 @@ export default function VerifyPhonePage() {
       ) : null}
 
       {message ? <p className="mt-3 text-sm">{message}</p> : null}
+      <p className="mt-3 text-sm">
+        Back to{" "}
+        <Link className="underline" href="/login">
+          login
+        </Link>
+      </p>
     </main>
   );
 }

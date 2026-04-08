@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Property = {
   id: string;
@@ -22,10 +22,6 @@ export default function PropertiesPage() {
       setProperties((await res.json()) as Property[]);
     }
   }
-
-  useEffect(() => {
-    void loadProperties();
-  }, []);
 
   async function createProperty() {
     setMessage("");
@@ -51,6 +47,9 @@ export default function PropertiesPage() {
   return (
     <main className="mx-auto max-w-4xl p-6">
       <h1 className="text-2xl font-semibold">Properties</h1>
+      <button onClick={() => void loadProperties()} className="mt-3 rounded-md border px-4 py-2">
+        Load Properties
+      </button>
 
       <section className="mt-4 rounded-lg border p-4">
         <h2 className="font-medium">Add Property</h2>
