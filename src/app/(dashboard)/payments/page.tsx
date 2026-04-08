@@ -1,14 +1,10 @@
 "use client";
 
 import { useState } from "react";
-
-type Tenant = {
-  id: string;
-  fullName: string;
-  phone: string;
-  unitNumber: string;
-  rentAmount: number;
-};
+import { apiGet } from "@/services/api-client";
+import { useMpesaPayment } from "@/hooks/useMpesaPayment";
+import type { TenantDto } from "@/types";
+import { formatCurrency } from "@/utils/formatters";
 
 type Payment = {
   id: string;
@@ -22,32 +18,34 @@ type Payment = {
 };
 
 export default function PaymentsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [tenants, setTenants] = useState<TenantDto[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [tenantId, setTenantId] = useState("");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState<number>(0);
   const [msg, setMsg] = useState("");
+  const { initiatePayment, loading, error } = useMpesaPayment();
 
   async function load() {
-    const [tRes, pRes] = await Promise.all([fetch("/api/tenants"), fetch("/api/payments")]);
-    if (tRes.ok) setTenants((await tRes.json()) as Tenant[]);
-    if (pRes.ok) setPayments((await pRes.json()) as Payment[]);
+    setMsg("");
+    try {
+      const [tenantsData, paymentsData] = await Promise.all([
+        apiGet<TenantDto[]>("/api/tenants"),
+        apiGet<Payment[]>("/api/payments"),
+      ]);
+      setTenants(tenantsData);
+      setPayments(paymentsData);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Failed to load payments data.");
+    }
   }
 
   async function initiate() {
     setMsg("");
-    const res = await fetch("/api/mpesa/stkpush", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tenantId, phone, amount }),
-    });
-    const data = (await res.json()) as { customerMessage?: string; error?: string };
-    if (res.ok) {
-      setMsg(data.customerMessage ?? "STK push sent.");
+    const response = await initiatePayment({ tenantId, phone, amount });
+    if (response) {
+      setMsg(response.customerMessage ?? "STK push sent.");
       await load();
-    } else {
-      setMsg(data.error ?? "Failed to initiate payment.");
     }
   }
 
@@ -97,12 +95,13 @@ export default function PaymentsPage() {
           />
         </div>
         <button onClick={initiate} className="mt-3 rounded-md bg-black text-white px-4 py-2">
-          Send STK Push
+          {loading ? "Sending..." : "Send STK Push"}
         </button>
         <button onClick={() => void load()} className="mt-3 ml-2 rounded-md border px-4 py-2">
           Refresh Data
         </button>
         {msg ? <p className="mt-2 text-sm">{msg}</p> : null}
+        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </section>
 
       <section className="mt-6 rounded-lg border p-4 overflow-auto">
@@ -122,7 +121,7 @@ export default function PaymentsPage() {
               <tr key={p.id} className="border-b">
                 <td className="py-2">{p.tenantName}</td>
                 <td className="py-2">{p.unitNumber}</td>
-                <td className="py-2">KES {p.amount.toFixed(2)}</td>
+                <td className="py-2">{formatCurrency(p.amount)}</td>
                 <td className="py-2">{p.status}</td>
                 <td className="py-2">{p.mpesaReceipt ?? "-"}</td>
               </tr>

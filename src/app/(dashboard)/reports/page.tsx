@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { apiGet } from "@/services/api-client";
+import { formatCurrency } from "@/utils/formatters";
 
 type EritsResponse = {
   month: string;
@@ -19,15 +21,8 @@ export default function ReportsPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/reports/erits/generate", {
-        method: "GET",
-      });
-      const data = (await res.json()) as EritsResponse | { error: string };
-      if (!res.ok) {
-        setError((data as { error: string }).error ?? "Failed to generate.");
-        return;
-      }
-      setReport(data as EritsResponse);
+      const data = await apiGet<EritsResponse>("/api/reports/erits/generate");
+      setReport(data);
     } catch {
       setError("Failed to generate report.");
     } finally {
@@ -56,9 +51,9 @@ export default function ReportsPage() {
         <section className="mt-6 rounded-lg border p-4">
           <h2 className="font-medium">Report for {report.month}</h2>
           <p className="mt-2 text-sm">Successful payments: {report.successfulPayments}</p>
-          <p className="text-sm">Gross rent: KES {report.grossRent.toFixed(2)}</p>
+          <p className="text-sm">Gross rent: {formatCurrency(report.grossRent)}</p>
           <p className="text-sm">Tax rate: {(report.taxRate * 100).toFixed(1)}%</p>
-          <p className="text-sm font-semibold">Tax due: KES {report.taxDue.toFixed(2)}</p>
+          <p className="text-sm font-semibold">Tax due: {formatCurrency(report.taxDue)}</p>
         </section>
       ) : null}
     </main>

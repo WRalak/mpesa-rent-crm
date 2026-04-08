@@ -1,47 +1,37 @@
 "use client";
 
 import { useState } from "react";
-
-type Property = {
-  id: string;
-  name: string;
-  location: string;
-  unitCount: number;
-};
+import { apiGet, apiPost } from "@/services/api-client";
+import type { PropertyDto } from "@/types";
 
 export default function PropertiesPage() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyDto[]>([]);
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [unitCount, setUnitCount] = useState(0);
   const [message, setMessage] = useState("");
 
   async function loadProperties() {
-    const res = await fetch("/api/properties");
-    if (res.ok) {
-      setProperties((await res.json()) as Property[]);
+    setMessage("");
+    try {
+      setProperties(await apiGet<PropertyDto[]>("/api/properties"));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to load properties.");
     }
   }
 
   async function createProperty() {
     setMessage("");
-    const res = await fetch("/api/properties", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, location, unitCount }),
-    });
-
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      setMessage(data.error ?? "Failed to create property.");
-      return;
+    try {
+      await apiPost<PropertyDto>("/api/properties", { name, location, unitCount });
+      setName("");
+      setLocation("");
+      setUnitCount(0);
+      setMessage("Property created.");
+      await loadProperties();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to create property.");
     }
-
-    setName("");
-    setLocation("");
-    setUnitCount(0);
-    setMessage("Property created.");
-    await loadProperties();
   }
 
   return (

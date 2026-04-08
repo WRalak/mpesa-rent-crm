@@ -1,24 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { apiGet, apiPost } from "@/services/api-client";
+import type { PropertyDto, TenantDto } from "@/types";
+import { formatCurrency } from "@/utils/formatters";
 
-type Tenant = {
-  id: string;
-  fullName: string;
-  phone: string;
-  unitNumber: string;
-  rentAmount: number;
-};
-
-type Property = {
-  id: string;
-  name: string;
-  unitCount: number;
-};
+type PropertyOption = Pick<PropertyDto, "id" | "name" | "unitCount">;
 
 export default function TenantsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [tenants, setTenants] = useState<TenantDto[]>([]);
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
@@ -27,42 +18,39 @@ export default function TenantsPage() {
   const [message, setMessage] = useState("");
 
   async function loadData() {
-    const [tRes, pRes] = await Promise.all([fetch("/api/tenants"), fetch("/api/properties")]);
-    if (tRes.ok) {
-      setTenants((await tRes.json()) as Tenant[]);
-    }
-    if (pRes.ok) {
-      setProperties((await pRes.json()) as Property[]);
+    setMessage("");
+    try {
+      const [tenantsData, propertiesData] = await Promise.all([
+        apiGet<TenantDto[]>("/api/tenants"),
+        apiGet<PropertyOption[]>("/api/properties"),
+      ]);
+      setTenants(tenantsData);
+      setProperties(propertiesData);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to load tenants.");
     }
   }
 
   async function createTenant() {
     setMessage("");
-    const res = await fetch("/api/tenants", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await apiPost<TenantDto>("/api/tenants", {
         fullName,
         phone,
         unitNumber,
         rentAmount,
         propertyId,
-      }),
-    });
-
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      setMessage(data.error ?? "Failed to create tenant.");
-      return;
+      });
+      setFullName("");
+      setPhone("");
+      setUnitNumber("");
+      setRentAmount(0);
+      setPropertyId("");
+      setMessage("Tenant created.");
+      await loadData();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to create tenant.");
     }
-
-    setFullName("");
-    setPhone("");
-    setUnitNumber("");
-    setRentAmount(0);
-    setPropertyId("");
-    setMessage("Tenant created.");
-    await loadData();
   }
 
   return (
@@ -126,7 +114,7 @@ export default function TenantsPage() {
             <p className="font-medium">{t.fullName}</p>
             <p className="text-sm text-gray-600">Unit {t.unitNumber}</p>
             <p className="text-sm">{t.phone}</p>
-            <p className="text-sm">KES {t.rentAmount.toFixed(2)}</p>
+            <p className="text-sm">{formatCurrency(t.rentAmount)}</p>
           </div>
         ))}
         {tenants.length === 0 ? <p className="text-sm text-gray-600">No tenants yet.</p> : null}

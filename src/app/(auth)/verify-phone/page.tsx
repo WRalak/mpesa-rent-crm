@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function VerifyPhonePage() {
+function VerifyPhoneContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [phone, setPhone] = useState(() => params.get("phone") ?? "");
@@ -81,5 +81,13 @@ export default function VerifyPhonePage() {
         </Link>
       </p>
     </main>
+  );
+}
+
+export default function VerifyPhonePage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-md p-8">Loading verification form...</main>}>
+      <VerifyPhoneContent />
+    </Suspense>
   );
 }
