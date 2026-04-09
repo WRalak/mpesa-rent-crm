@@ -43,8 +43,8 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.1.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.0.0",
+    "@testing-library/react": "^15.0.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/cookie": "^0.6.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20",
@@ -58,5 +58,16 @@
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@testing-library/react": {
+      "react": "^19.0.0"
+    },
+    "@testing-library/user-event": {
+      "react": "^19.0.0"
+    },
+    "@testing-library/jest-dom": {
+      "react": "^19.0.0"
+    }
   }
 }
