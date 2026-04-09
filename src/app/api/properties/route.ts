@@ -27,33 +27,122 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * limit;
 
-export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-  const parsed = createPropertySchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
-
-  const property = await db.property.create({
-    data: {
-      name: parsed.data.name,
-      location: parsed.data.location,
-      unitCount: parsed.data.unitCount,
+    const where = {
       landlordId: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      unitCount: true,
-      createdAt: true,
-    },
-  });
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { location: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }),
+    };
 
-  return NextResponse.json(property, { status: 201 });
+    const [properties, total] = await Promise.all([
+      db.property.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          _count: {
+            select: { tenants: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.property.count({ where }),
+    ]);
+
+    logger.api('GET', '/api/properties', 200, undefined, {
+      userId: session.user.id,
+      page,
+      limit,
+      search,
+      total,
+    });
+
+    return NextResponse.json({
+      properties,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    logger.error('Failed to fetch properties', { error: String(error) });
+    return NextResponse.json(
+      { error: "Failed to fetch properties" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  let body: any;
+  
+  try {
+    const rateLimitResult = generalRateLimit.check(request as any);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
+    
+    const validatedData = propertySchema.parse(body) as PropertyInput;
+
+    const property = await db.property.create({
+      data: {
+        ...validatedData,
+        landlordId: session.user.id,
+      },
+      include: {
+        _count: {
+          select: { tenants: true },
+        },
+      },
+    });
+
+    logger.api('POST', '/api/properties', 201, undefined, {
+      userId: session.user.id,
+      propertyId: property.id,
+      propertyName: property.name,
+    });
+
+    return NextResponse.json(property, { status: 201 });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error('Failed to create property', { 
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      requestBody: body || 'undefined'
+    });
+    
+    if (error instanceof Error && error.message.includes('Invalid')) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: `Failed to create property: ${errorMessage}` },
+      { status: 500 }
+    );
+  }
 }

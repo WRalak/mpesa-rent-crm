@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { Role } from "@prisma/client";
 
 export default function RegisterPage() {
   async function register(formData: FormData) {
@@ -20,7 +21,7 @@ export default function RegisterPage() {
         name,
         email: email || null,
         phone,
-        role: "LANDLORD",
+        role: Role.LANDLORD,
       },
     });
 

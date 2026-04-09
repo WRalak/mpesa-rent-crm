@@ -54,6 +54,12 @@ export class RateLimiter {
   }
 
   private getIdentifier(request: NextRequest): string {
+    // For localhost, use a simple identifier to avoid rate limiting
+    const host = request.headers.get('host');
+    if (host && (host.includes('localhost') || host.includes('127.0.0.1'))) {
+      return 'localhost';
+    }
+    
     // Try to get IP from various headers
     const forwarded = request.headers.get('x-forwarded-for');
     const realIp = request.headers.get('x-real-ip');
@@ -62,5 +68,13 @@ export class RateLimiter {
   }
 }
 
-export const authRateLimit = new RateLimiter(15 * 60 * 1000, 5); // 5 attempts per 15 minutes for auth
-export const generalRateLimit = new RateLimiter(15 * 60 * 1000, 100); // 100 requests per 15 minutes
+export const authRateLimit = new RateLimiter(15 * 60 * 1000, 1000); // 1000 attempts per 15 minutes for auth
+export const generalRateLimit = new RateLimiter(15 * 60 * 1000, 10000); // 10000 requests per 15 minutes
+
+// Clear rate limits for localhost development
+export function clearLocalhostRateLimits() {
+  const keysToDelete = ['localhost'];
+  for (const key of keysToDelete) {
+    store.delete(key);
+  }
+}

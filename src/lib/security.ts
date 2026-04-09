@@ -1,5 +1,24 @@
-import { NextRequest } from 'next/server';
-import { randomBytes, timingSafeEqual } from 'crypto';
+import { NextRequest } from "next/server";
+
+// Use Web Crypto API for Edge Runtime compatibility
+const randomBytes = (length: number): Uint8Array => {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return crypto.getRandomValues(new Uint8Array(length));
+  }
+  // Fallback for Node.js environment
+  const { randomBytes: nodeRandomBytes } = require('crypto');
+  return nodeRandomBytes(length);
+};
+
+const timingSafeEqual = (a: Buffer | Uint8Array, b: Buffer | Uint8Array): boolean => {
+  if (a.length !== b.length) return false;
+  
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+  return result === 0;
+};
 
 export class SecurityUtils {
   private static readonly CSRF_TOKEN_LENGTH = 32;
@@ -7,7 +26,8 @@ export class SecurityUtils {
   private static readonly CSRF_HEADER_NAME = 'x-csrf-token';
 
   static generateCSRFToken(): string {
-    return randomBytes(this.CSRF_TOKEN_LENGTH).toString('hex');
+    const bytes = randomBytes(this.CSRF_TOKEN_LENGTH);
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 
   static validateCSRFToken(request: NextRequest): boolean {
@@ -50,7 +70,7 @@ export class SecurityUtils {
 
   static validatePhoneNumber(phone: string): boolean {
     const cleaned = phone.replace(/\D/g, '');
-    return cleaned.length >= 10 && cleaned.length <= 15;
+    return cleaned.length >= 5 && cleaned.length <= 20;
   }
 
   static validateEmail(email: string): boolean {

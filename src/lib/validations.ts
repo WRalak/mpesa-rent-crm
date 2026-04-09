@@ -3,11 +3,11 @@ import { z } from "zod";
 // Phone number validation
 export const phoneSchema = z
   .string()
-  .min(10, "Phone number must have at least 10 digits")
-  .max(15, "Phone number must not exceed 15 digits")
+  .min(5, "Phone number must have at least 5 digits")
+  .max(20, "Phone number must not exceed 20 digits")
   .transform((value) => value.replace(/\D/g, ""))
-  .refine((value) => value.length >= 10, "Phone number must have at least 10 digits")
-  .refine((value) => value.length <= 15, "Phone number must not exceed 15 digits");
+  .refine((value) => value.length >= 5, "Phone number must have at least 5 digits")
+  .refine((value) => value.length <= 20, "Phone number must not exceed 20 digits");
 
 // Amount validation
 export const amountSchema = z
@@ -33,7 +33,12 @@ export const propertySchema = z.object({
     .int("Unit count must be a whole number")
     .min(1, "Property must have at least 1 unit")
     .max(1000, "Property cannot have more than 1000 units"),
-});
+}).transform((data) => ({
+  ...data,
+  name: data.name.trim(),
+  location: data.location.trim(),
+  unitCount: Math.max(1, Math.floor(data.unitCount)),
+}));
 
 // Tenant validation
 export const tenantSchema = z.object({
@@ -41,8 +46,7 @@ export const tenantSchema = z.object({
     .string()
     .min(2, "Full name must have at least 2 characters")
     .max(100, "Full name cannot exceed 100 characters")
-    .trim()
-    .refine((value) => /^[a-zA-Z\s]+$/.test(value), "Full name can only contain letters and spaces"),
+    .trim(),
   phone: phoneSchema,
   unitNumber: z
     .string()
@@ -52,9 +56,12 @@ export const tenantSchema = z.object({
   rentAmount: amountSchema,
   propertyId: z
     .string()
-    .min(1, "Property is required")
-    .cuid("Invalid property selection"),
-});
+    .min(1, "Property is required"),
+}).transform((data) => ({
+  ...data,
+  fullName: data.fullName.trim(),
+  unitNumber: data.unitNumber.trim(),
+}));
 
 // Payment validation
 export const paymentSchema = z.object({

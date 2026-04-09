@@ -16,7 +16,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "scaffold": "node scripts/scaffold.mjs",
     "setup:env": "node scripts/setup-env.js",
-    "create:admin": "tsx scripts/create-admin-user.ts"
+    "create:admin": "tsx scripts/create-admin-user.ts",
+    "create:test-users": "tsx scripts/create-test-users.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
@@ -24,7 +25,16 @@
     "next-auth": "^5.0.0-beta.25",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "ioredis": "^5.3.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

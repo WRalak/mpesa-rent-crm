@@ -23,15 +23,38 @@ export default function PropertiesPage() {
 
   async function createProperty() {
     setMessage("");
+    
+    // Basic validation
+    if (!name.trim()) {
+      setMessage("Property name is required.");
+      return;
+    }
+    if (!location.trim()) {
+      setMessage("Location is required.");
+      return;
+    }
+    if (unitCount < 1) {
+      setMessage("Unit count must be at least 1.");
+      return;
+    }
+    
     try {
-      await apiPost<PropertyDto>("/api/properties", { name, location, unitCount });
+      const propertyData = {
+        name: name.trim(),
+        location: location.trim(),
+        unitCount: Math.max(1, Math.floor(unitCount))
+      };
+      
+      await apiPost<PropertyDto>("/api/properties", propertyData);
       setName("");
       setLocation("");
       setUnitCount(0);
-      setMessage("Property created.");
+      setMessage("Property created successfully!");
       await loadProperties();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to create property.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to create property.";
+      setMessage(`Error: ${errorMessage}`);
+      console.error("Property creation error:", error);
     }
   }
 
@@ -70,7 +93,14 @@ export default function PropertiesPage() {
         <button onClick={createProperty} className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800">
           Save Property
         </button>
-        {message ? <p className="mt-2 text-sm">{message}</p> : null}
+        {message ? (
+          <p className={`mt-2 text-sm ${
+            message.includes('Error') ? 'text-red-600' : 
+            message.includes('successfully') ? 'text-green-600' : 'text-blue-600'
+          }`}>
+            {message}
+          </p>
+        ) : null}
       </SectionCard>
 
       <div className="space-y-3">

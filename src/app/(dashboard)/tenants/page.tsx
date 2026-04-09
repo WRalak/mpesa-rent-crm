@@ -34,23 +34,50 @@ export default function TenantsPage() {
 
   async function createTenant() {
     setMessage("");
+    
+    // Basic validation
+    if (!fullName.trim()) {
+      setMessage("Full name is required.");
+      return;
+    }
+    if (!phone.trim()) {
+      setMessage("Phone number is required.");
+      return;
+    }
+    if (!unitNumber.trim()) {
+      setMessage("Unit number is required.");
+      return;
+    }
+    if (rentAmount <= 0) {
+      setMessage("Rent amount must be greater than 0.");
+      return;
+    }
+    if (!propertyId) {
+      setMessage("Please select a property.");
+      return;
+    }
+    
     try {
-      await apiPost<TenantDto>("/api/tenants", {
-        fullName,
-        phone,
-        unitNumber,
-        rentAmount,
+      const tenantData = {
+        fullName: fullName.trim(),
+        phone: phone.replace(/\D/g, ""), // Remove non-digits
+        unitNumber: unitNumber.trim(),
+        rentAmount: Math.max(0, rentAmount),
         propertyId,
-      });
+      };
+      
+      await apiPost<TenantDto>("/api/tenants", tenantData);
       setFullName("");
       setPhone("");
       setUnitNumber("");
       setRentAmount(0);
       setPropertyId("");
-      setMessage("Tenant created.");
+      setMessage("Tenant created successfully!");
       await loadData();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to create tenant.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to create tenant.";
+      setMessage(`Error: ${errorMessage}`);
+      console.error("Tenant creation error:", error);
     }
   }
 
@@ -108,7 +135,14 @@ export default function TenantsPage() {
         <button onClick={createTenant} className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800">
           Save Tenant
         </button>
-        {message ? <p className="mt-2 text-sm">{message}</p> : null}
+        {message ? (
+          <p className={`mt-2 text-sm ${
+            message.includes('Error') ? 'text-red-600' : 
+            message.includes('successfully') ? 'text-green-600' : 'text-blue-600'
+          }`}>
+            {message}
+          </p>
+        ) : null}
       </SectionCard>
 
       <div className="space-y-3">

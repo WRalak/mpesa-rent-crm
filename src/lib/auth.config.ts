@@ -2,11 +2,13 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { SecurityUtils } from "@/lib/security";
+import type { JWT } from "next-auth/jwt";
+import type { Session } from "next-auth";
 
 const loginSchema = z.object({
   phone: z.string()
-    .min(10, "Phone number must be at least 10 digits")
-    .max(15, "Phone number must not exceed 15 digits")
+    .min(5, "Phone number must be at least 5 digits")
+    .max(20, "Phone number must not exceed 20 digits")
     .refine((phone) => SecurityUtils.validatePhoneNumber(phone), {
       message: "Invalid phone number format",
     }),
@@ -89,6 +91,21 @@ export const authConfig = {
       } catch {
         return false;
       }
+    },
+    async jwt({ token, user }: { token: JWT; user?: any }) {
+      if (user) {
+        token.role = (user as { role?: string }).role ?? "LANDLORD";
+        token.phone = (user as { phone?: string }).phone;
+      }
+      return token;
+    },
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (session.user) {
+        session.user.id = token.sub ?? "";
+        session.user.role = (token.role as string) ?? "LANDLORD";
+        session.user.phone = (token.phone as string) ?? "";
+      }
+      return session;
     },
   },
   trustHost: true,
