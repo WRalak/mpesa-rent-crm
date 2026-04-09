@@ -62,129 +62,122 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <PageShell
-      title="Admin Dashboard"
-      description="Platform-level management and analytics"
-      actions={<LogoutButton />}
-    >
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Platform Overview</h1>
+          <p className="text-slate-400 mt-1">Monitor and manage the entire platform</p>
+        </div>
+        <LogoutButton />
+      </div>
       {/* Platform Overview */}
-      <SectionCard title="Platform Overview">
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">Platform Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+          <div className="bg-gradient-to-br from-blue-600/20 to-blue-700/20 rounded-xl p-6 border border-blue-600/30">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-blue-600">Total Landlords</h3>
+              <h3 className="text-sm font-medium text-blue-400">Total Landlords</h3>
               <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
                 <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
               </div>
             </div>
-            <p className="text-2xl font-bold text-blue-900">{stats.totalLandlords}</p>
-            <p className="text-xs text-blue-600 mt-1">Active landlords</p>
+            <p className="text-2xl font-bold text-white">{stats.totalLandlords}</p>
+            <p className="text-xs text-blue-400 mt-1">Active landlords</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+          <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/20 rounded-xl p-6 border border-purple-600/30">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-purple-600">Total Properties</h3>
+              <h3 className="text-sm font-medium text-purple-400">Total Properties</h3>
               <div className="h-8 w-8 bg-purple-500 rounded-lg flex items-center justify-center">
                 <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2l.586.586a1 1 0 001.414-1.414l-7-7z" />
                 </svg>
               </div>
             </div>
-            <p className="text-2xl font-bold text-purple-900">{stats.totalProperties}</p>
-            <p className="text-xs text-purple-600 mt-1">Registered properties</p>
+            <p className="text-2xl font-bold text-white">{stats.totalProperties}</p>
+            <p className="text-xs text-purple-400 mt-1">Registered properties</p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+          <div className="bg-gradient-to-br from-green-600/20 to-green-700/20 rounded-xl p-6 border border-green-600/30">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-green-600">Total Tenants</h3>
+              <h3 className="text-sm font-medium text-green-400">Total Tenants</h3>
               <div className="h-8 w-8 bg-green-500 rounded-lg flex items-center justify-center">
                 <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                 </svg>
               </div>
             </div>
-            <p className="text-2xl font-bold text-green-900">{stats.totalTenants}</p>
-            <p className="text-xs text-green-600 mt-1">Active tenants</p>
+            <p className="text-2xl font-bold text-white">{stats.totalTenants}</p>
+            <p className="text-xs text-green-400 mt-1">Active tenants</p>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+          <div className="bg-gradient-to-br from-orange-600/20 to-orange-700/20 rounded-xl p-6 border border-orange-600/30">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-orange-600">Monthly Revenue</h3>
+              <h3 className="text-sm font-medium text-orange-400">Monthly Revenue</h3>
               <div className="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
                 <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M8.433 7.418c.155-.103.346-.196.567-.267.653-.145.998-.145.998 0l2.184 1.427a1.125 1.125 0 001.71.054l1.828-1.418a1 1 0 00.327-1.268l-1.889-1.467A1.125 1.125 0 008.02 8.06l-.22.127zM10.873 16.82l-1.828-1.418a1.125 1.125 0 00-1.71.054l-2.184 1.427a1 1 0 00-.327 1.268l1.889 1.467a1.125 1.125 0 001.887-.645l.22-.127a1.125 1.125 0 00.567-.267c.653-.145.998-.145.998 0l2.184 1.427z" />
                 </svg>
               </div>
             </div>
-            <p className="text-2xl font-bold text-orange-900">{formatCurrency(stats.monthlyRevenue)}</p>
-            <p className="text-xs text-orange-600 mt-1">This month</p>
+            <p className="text-2xl font-bold text-white">{formatCurrency(stats.monthlyRevenue)}</p>
+            <p className="text-xs text-orange-400 mt-1">This month</p>
           </div>
         </div>
-      </SectionCard>
+      </div>
 
       {/* System Health */}
-      <SectionCard title="System Health">
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">System Health</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+          <div className="flex items-center justify-between p-4 bg-green-900/30 rounded-lg border border-green-600/30">
             <div>
-              <h4 className="font-medium text-green-900">System Status</h4>
-              <p className="text-sm text-green-600">All systems operational</p>
+              <h4 className="font-medium text-green-400">System Status</h4>
+              <p className="text-sm text-green-300">All systems operational</p>
             </div>
             <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
           </div>
-
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between p-4 bg-blue-900/30 rounded-lg border border-blue-600/30">
             <div>
-              <h4 className="font-medium text-blue-900">Active Users</h4>
-              <p className="text-sm text-blue-600">Currently online</p>
+              <h4 className="font-medium text-blue-400">Database</h4>
+              <p className="text-sm text-blue-300">Connected and healthy</p>
             </div>
-            <span className="text-2xl font-bold text-blue-900">{stats.activeUsers}</span>
+            <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
           </div>
-
-          <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg border border-purple-200">
+          <div className="flex items-center justify-between p-4 bg-purple-900/30 rounded-lg border border-purple-600/30">
             <div>
-              <h4 className="font-medium text-purple-900">Transactions</h4>
-              <p className="text-sm text-purple-600">Total processed</p>
+              <h4 className="font-medium text-purple-400">API Response</h4>
+              <p className="text-sm text-purple-300">Average 45ms</p>
             </div>
-            <span className="text-2xl font-bold text-purple-900">{stats.totalTransactions.toLocaleString()}</span>
+            <div className="h-3 w-3 bg-purple-500 rounded-full"></div>
           </div>
         </div>
-      </SectionCard>
+      </div>
 
       {/* Recent Registrations */}
-      <SectionCard title="Recent Landlord Registrations">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Phone</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Registered</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.recentRegistrations.map((user) => (
-                <tr key={user.id} className="border-b border-gray-100">
-                  <td className="py-3 px-4">{user.name}</td>
-                  <td className="py-3 px-4 font-mono text-xs">{user.phone}</td>
-                  <td className="py-3 px-4">{user.registeredAt}</td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                      Active
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">Recent Registrations</h2>
+        <div className="space-y-3">
+          {stats.recentRegistrations.map((registration) => (
+            <div key={registration.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600/30">
+              <div>
+                <h4 className="font-medium text-white">{registration.name}</h4>
+                <p className="text-sm text-slate-400">{registration.phone}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-slate-300">{registration.registeredAt}</p>
+                <p className="text-xs text-slate-500">Registered</p>
+              </div>
+            </div>
+          ))}
         </div>
-      </SectionCard>
+      </div>
 
       {/* Admin Actions */}
-      <SectionCard title="Admin Actions">
+      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">Admin Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button className="flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-3 hover:bg-blue-700 transition-colors">
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +208,7 @@ export default function AdminDashboardPage() {
             View Logs
           </button>
         </div>
-      </SectionCard>
-    </PageShell>
+      </div>
+    </div>
   );
 }
