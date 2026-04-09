@@ -5,6 +5,14 @@ import { formatCurrency } from "@/utils/formatters";
 import { PageShell, StatCard, SectionCard } from "@/components/ui/page-shell";
 import { AIInsights } from "@/components/dashboard/ai-insights";
 
+// Fallback data in case of API errors
+const fallbackStats = {
+  propertiesCount: 0,
+  tenantsCount: 0,
+  pendingPayments: 0,
+  totalCollected: 0,
+};
+
 function LoadingSkeleton() {
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
