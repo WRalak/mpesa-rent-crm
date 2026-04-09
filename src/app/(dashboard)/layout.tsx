@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -18,19 +19,22 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-6 py-4">
-          <Link href="/dashboard" className="mr-2 text-sm font-semibold text-gray-900">
-            M-Pesa Rent CRM
-          </Link>
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              {link.label}
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard" className="mr-2 text-sm font-semibold text-gray-900">
+              M-Pesa Rent CRM
             </Link>
-          ))}
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <LogoutButton />
         </div>
       </header>
       <div className="mx-auto w-full max-w-6xl">{children}</div>

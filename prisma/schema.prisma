@@ -9,35 +9,48 @@ datasource db {
 
 model User {
   id          String   @id @default(cuid())
-  name        String?
-  email       String?  @unique
-  phone       String   @unique
+  name        String?  @db.Text
+  email       String?  @unique @db.VarChar(255)
+  phone       String   @unique @db.VarChar(20)
   role        Role     @default(LANDLORD)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   properties  Property[]
   tenants     Tenant[]
   payments    Payment[]
+
+  @@index([phone])
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
 }
 
 model Property {
   id          String   @id @default(cuid())
-  name        String
-  location    String
+  name        String   @db.Text
+  location    String   @db.Text
   unitCount   Int      @default(0)
+  isActive    Boolean  @default(true)
   landlordId  String
   landlord    User     @relation(fields: [landlordId], references: [id])
   tenants     Tenant[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([landlordId])
+  @@index([isActive])
+  @@index([name])
+  @@index([landlordId, isActive])
 }
 
 model Tenant {
   id          String   @id @default(cuid())
-  fullName    String
-  phone       String
-  unitNumber  String
+  fullName    String   @db.Text
+  phone       String   @db.VarChar(20)
+  unitNumber  String   @db.VarChar(20)
   rentAmount  Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
   propertyId  String
   landlordId  String
   property    Property @relation(fields: [propertyId], references: [id])
@@ -45,13 +58,20 @@ model Tenant {
   payments    Payment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([landlordId])
+  @@index([propertyId])
+  @@index([phone])
+  @@index([isActive])
+  @@index([landlordId, isActive])
+  @@index([propertyId, isActive])
 }
 
 model Payment {
   id               String        @id @default(cuid())
-  mpesaReceipt     String?       @unique
+  mpesaReceipt     String?       @unique @db.VarChar(50)
   amount           Decimal       @db.Decimal(10, 2)
-  phoneNumber      String
+  phoneNumber      String        @db.VarChar(20)
   status           PaymentStatus @default(PENDING)
   paidAt           DateTime?
   tenantId         String
@@ -60,6 +80,16 @@ model Payment {
   landlord         User          @relation(fields: [landlordId], references: [id])
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+
+  @@index([landlordId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([paidAt])
+  @@index([mpesaReceipt])
+  @@index([phoneNumber])
+  @@index([landlordId, status])
+  @@index([tenantId, status])
+  @@index([status, paidAt])
 }
 
 enum Role {

@@ -1,34 +1,31 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { generalRateLimit } from "@/lib/rate-limiter";
+import { logger } from "@/lib/logger";
+import { propertySchema, PropertyInput } from "@/lib/validations";
 
-const createPropertySchema = z.object({
-  name: z.string().min(2),
-  location: z.string().min(2),
-  unitCount: z.number().int().min(0),
-});
+export async function GET(request: Request) {
+  try {
+    const rateLimitResult = generalRateLimit.check(request as any);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const properties = await db.property.findMany({
-    where: { landlordId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      unitCount: true,
-      createdAt: true,
-    },
-  });
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
 
-  return NextResponse.json(properties);
-}
+    const skip = (page - 1) * limit;
 
 export async function POST(req: Request) {
   const session = await auth();

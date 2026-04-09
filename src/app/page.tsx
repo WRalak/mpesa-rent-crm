@@ -1,6 +1,67 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center p-8">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900"></div>
+          <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (session) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center p-8">
+        <section className="w-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:p-12">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Welcome back, {session.user?.name || session.user?.phone}!
+              </h1>
+              <p className="mt-2 text-slate-600">
+                You're logged in to your M-Pesa Rent CRM dashboard.
+              </p>
+            </div>
+            <LogoutButton />
+          </div>
+          
+          <div className="mt-8">
+            <Link 
+              href="/dashboard" 
+              className="inline-flex rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800"
+            >
+              Go to Dashboard
+            </Link>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <h3 className="font-medium text-slate-900">Properties</h3>
+              <p className="mt-1">Manage your rental properties</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <h3 className="font-medium text-slate-900">Tenants</h3>
+              <p className="mt-1">Track tenant information and payments</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <h3 className="font-medium text-slate-900">Reports</h3>
+              <p className="mt-1">Generate tax and financial reports</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center p-8">
       <section className="w-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:p-12">
