@@ -70,17 +70,6 @@ export default function DebugUserInfo() {
               </a>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg p-6 shadow">
-            <h2 className="text-xl font-semibold mb-4">Test Users</h2>
-            <div className="space-y-2 text-sm">
-              <p><strong>Admin:</strong> 254700000001</p>
-              <p><strong>Landlord 1:</strong> 254700000002</p>
-              <p><strong>Landlord 2:</strong> 254700000003</p>
-              <p><strong>Landlord 3:</strong> 254700000004</p>
-              <p><strong>Landlord 4:</strong> 254700000005</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

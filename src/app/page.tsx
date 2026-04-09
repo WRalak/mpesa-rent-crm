@@ -188,60 +188,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Test Users Section */}
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 md:p-12 text-white">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Try It Now</h2>
-            <p className="text-xl text-blue-100">Use these test credentials to explore the platform</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold">Admin User</h4>
-              </div>
-              <p className="text-blue-100 font-mono text-sm">254700000000</p>
-              <p className="text-blue-200 text-xs mt-1">Full platform access</p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold">Landlord 1</h4>
-              </div>
-              <p className="text-blue-100 font-mono text-sm">254700000001</p>
-              <p className="text-blue-200 text-xs mt-1">John - Property owner</p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                  </svg>
-                </div>
-                <h4 className="font-semibold">Landlord 2</h4>
-              </div>
-              <p className="text-blue-100 font-mono text-sm">254700000002</p>
-              <p className="text-blue-200 text-xs mt-1">Jane - Property owner</p>
-            </div>
-          </div>
-          
-          <div className="text-center mt-8">
-            <p className="text-blue-200 text-sm">No password required - just enter the phone number!</p>
-          </div>
-        </div>
       </div>
-    </div>
   );
 }

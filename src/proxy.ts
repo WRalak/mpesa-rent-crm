@@ -10,21 +10,21 @@ export default auth((req) => {
   const isAdminRoute = pathname.startsWith("/admin");
 
   if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
   if (isLoggedIn && (pathname === "/login" || pathname === "/register" || pathname === "/verify-phone")) {
     // Redirect based on user role
     const userRole = req.auth?.user?.role;
     if (userRole === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      return NextResponse.redirect(new URL("/admin/dashboard", req.nextUrl.origin));
     }
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   }
 
   // Protect admin routes
   if (isAdminRoute && req.auth?.user?.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   }
 
   return NextResponse.next();
