@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ToastProvider } from "@/components/ui/toast";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { SessionProviderWrapper } from "@/components/auth/session-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,6 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "M-Pesa Rent CRM",
   description: "Rent collection and eRITS compliance for small landlords",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  openGraph: {
+    title: "M-Pesa Rent CRM",
+    description: "Rent collection and eRITS compliance for small landlords",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +36,18 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <meta name="csrf-token" content={process.env.NEXT_PUBLIC_CSRF_TOKEN || ''} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ErrorBoundary>
+          <SessionProviderWrapper>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </SessionProviderWrapper>
+        </ErrorBoundary>
+      </body>
     </html>
   );
 }

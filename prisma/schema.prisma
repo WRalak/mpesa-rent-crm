@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -13,23 +13,33 @@ model User {
   email       String?  @unique
   phone       String   @unique
   role        Role     @default(LANDLORD)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   properties  Property[]
   tenants     Tenant[]
   payments    Payment[]
+
+  @@index([phone])
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
 }
 
 model Property {
   id          String   @id @default(cuid())
   name        String
   location    String
-  unitCount   Int      @default(0)
+  unitCount   Int      @default(1)
   landlordId  String
-  landlord    User     @relation(fields: [landlordId], references: [id])
+  landlord    User     @relation(fields: [landlordId], references: [id], onDelete: Cascade)
   tenants     Tenant[]
+  payments    Payment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([landlordId])
+  @@index([name])
 }
 
 model Tenant {
@@ -37,29 +47,48 @@ model Tenant {
   fullName    String
   phone       String
   unitNumber  String
-  rentAmount  Decimal  @db.Decimal(10, 2)
+  rentAmount  Float
   propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   landlordId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  landlord    User     @relation(fields: [landlordId], references: [id])
+  landlord    User     @relation(fields: [landlordId], references: [id], onDelete: Cascade)
   payments    Payment[]
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([landlordId])
+  @@index([phone])
+  @@index([propertyId, isActive])
 }
 
 model Payment {
   id               String        @id @default(cuid())
   mpesaReceipt     String?       @unique
-  amount           Decimal       @db.Decimal(10, 2)
+  amount           Float
   phoneNumber      String
   status           PaymentStatus @default(PENDING)
   paidAt           DateTime?
   tenantId         String
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId       String
+  property         Property      @relation(fields: [propertyId], references: [id])
   landlordId       String
-  tenant           Tenant        @relation(fields: [tenantId], references: [id])
-  landlord         User          @relation(fields: [landlordId], references: [id])
+  landlord         User          @relation(fields: [landlordId], references: [id], onDelete: Cascade)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([landlordId])
+  @@index([status])
+  @@index([paidAt])
+  @@index([mpesaReceipt])
+  @@index([phoneNumber])
+  @@index([landlordId, status])
+  @@index([tenantId, status])
+  @@index([status, paidAt])
 }
 
 enum Role {

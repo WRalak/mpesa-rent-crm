@@ -1,24 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { apiGet, apiPost } from "@/services/api-client";
+import type { PropertyDto, TenantDto } from "@/types";
+import { formatCurrency } from "@/utils/formatters";
+import { PageShell, SectionCard } from "@/components/ui/page-shell";
 
-type Tenant = {
-  id: string;
-  fullName: string;
-  phone: string;
-  unitNumber: string;
-  rentAmount: number;
-};
-
-type Property = {
-  id: string;
-  name: string;
-  unitCount: number;
-};
+type PropertyOption = Pick<PropertyDto, "id" | "name" | "unitCount">;
 
 export default function TenantsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [tenants, setTenants] = useState<TenantDto[]>([]);
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
@@ -26,55 +19,96 @@ export default function TenantsPage() {
   const [propertyId, setPropertyId] = useState("");
   const [message, setMessage] = useState("");
 
+  // Load data on component mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
   async function loadData() {
-    const [tRes, pRes] = await Promise.all([fetch("/api/tenants"), fetch("/api/properties")]);
-    if (tRes.ok) {
-      setTenants((await tRes.json()) as Tenant[]);
-    }
-    if (pRes.ok) {
-      setProperties((await pRes.json()) as Property[]);
+    setMessage("");
+    setLoading(true);
+    try {
+      const [tenantsData, propertiesData] = await Promise.all([
+        apiGet<TenantDto[]>("/api/tenants"),
+        apiGet<PropertyOption[]>("/api/properties"),
+      ]);
+      // Ensure we always have arrays
+      setTenants(Array.isArray(tenantsData) ? tenantsData : []);
+      setProperties(Array.isArray(propertiesData) ? propertiesData : []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      setMessage(error instanceof Error ? error.message : "Failed to load tenants.");
+      setTenants([]); // Reset to empty array on error
+      setProperties([]); // Reset to empty array on error
+    } finally {
+      setLoading(false);
     }
   }
-
-  useEffect(() => {
-    void loadData();
-  }, []);
 
   async function createTenant() {
     setMessage("");
-    const res = await fetch("/api/tenants", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullName,
-        phone,
-        unitNumber,
-        rentAmount,
-        propertyId,
-      }),
-    });
-
-    if (!res.ok) {
-      const data = (await res.json()) as { error?: string };
-      setMessage(data.error ?? "Failed to create tenant.");
+    
+    // Basic validation
+    if (!fullName.trim()) {
+      setMessage("Full name is required.");
       return;
     }
-
-    setFullName("");
-    setPhone("");
-    setUnitNumber("");
-    setRentAmount(0);
-    setPropertyId("");
-    setMessage("Tenant created.");
-    await loadData();
+    if (!phone.trim()) {
+      setMessage("Phone number is required.");
+      return;
+    }
+    if (!unitNumber.trim()) {
+      setMessage("Unit number is required.");
+      return;
+    }
+    if (rentAmount <= 0) {
+      setMessage("Rent amount must be greater than 0.");
+      return;
+    }
+    if (!propertyId) {
+      setMessage("Please select a property.");
+      return;
+    }
+    
+    try {
+      const tenantData = {
+        fullName: fullName.trim(),
+        phone: phone.replace(/\D/g, ""), // Remove non-digits
+        unitNumber: unitNumber.trim(),
+        rentAmount: Math.max(0, rentAmount),
+        propertyId,
+      };
+      
+      await apiPost<TenantDto>("/api/tenants", tenantData);
+      setFullName("");
+      setPhone("");
+      setUnitNumber("");
+      setRentAmount(0);
+      setPropertyId("");
+      setMessage("Tenant created successfully!");
+      await loadData();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create tenant.";
+      setMessage(`Error: ${errorMessage}`);
+      console.error("Tenant creation error:", error);
+    }
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold">Tenants</h1>
-
-      <section className="mt-4 rounded-lg border p-4">
-        <h2 className="font-medium">Add Tenant</h2>
+    <PageShell
+      title="Tenants"
+      description="Track tenant contacts and monthly rent amounts."
+      actions={
+        <button 
+          onClick={() => void loadData()} 
+          disabled={loading}
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
+        >
+          {loading ? "Loading..." : "Refresh"}
+        </button>
+      }
+    >
+      <SectionCard title="Add Tenant">
         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
           <input
             value={fullName}
@@ -103,34 +137,49 @@ export default function TenantsPage() {
           />
           <select
             value={propertyId}
+            aria-label="Select property"
             onChange={(e) => setPropertyId(e.target.value)}
             className="rounded-md border px-3 py-2"
           >
             <option value="">Select property</option>
-            {properties.map((property) => (
+            {Array.isArray(properties) && properties.map((property) => (
               <option key={property.id} value={property.id}>
                 {property.name} ({property.unitCount} units)
               </option>
             ))}
           </select>
         </div>
-        <button onClick={createTenant} className="mt-3 rounded-md bg-black px-4 py-2 text-white">
+        <button onClick={createTenant} className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800">
           Save Tenant
         </button>
-        {message ? <p className="mt-2 text-sm">{message}</p> : null}
-      </section>
+        {message ? (
+          <p className={`mt-2 text-sm ${
+            message.includes('Error') ? 'text-red-600' : 
+            message.includes('successfully') ? 'text-green-600' : 'text-blue-600'
+          }`}>
+            {message}
+          </p>
+        ) : null}
+      </SectionCard>
 
-      <div className="mt-4 space-y-3">
-        {tenants.map((t) => (
-          <div key={t.id} className="rounded-lg border p-4">
-            <p className="font-medium">{t.fullName}</p>
-            <p className="text-sm text-gray-600">Unit {t.unitNumber}</p>
-            <p className="text-sm">{t.phone}</p>
-            <p className="text-sm">KES {t.rentAmount.toFixed(2)}</p>
+      <div className="space-y-3">
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900"></div>
           </div>
-        ))}
-        {tenants.length === 0 ? <p className="text-sm text-gray-600">No tenants yet.</p> : null}
+        ) : Array.isArray(tenants) && tenants.length > 0 ? (
+          tenants.map((t) => (
+            <div key={t.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="font-medium">{t.fullName}</p>
+              <p className="text-sm text-gray-600">Unit {t.unitNumber}</p>
+              <p className="text-sm">{t.phone}</p>
+              <p className="text-sm">{formatCurrency(t.rentAmount)}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-gray-600">No tenants yet.</p>
+        )}
       </div>
-    </main>
+    </PageShell>
   );
 }

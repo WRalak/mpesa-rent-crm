@@ -1,8 +1,11 @@
+import { PageShell, SectionCard } from "@/components/ui/page-shell";
+
 export default function AdminSupportPage() {
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold">Support</h1>
-      <p className="mt-2 text-sm text-gray-600">Manage support tickets and landlord inquiries.</p>
-    </main>
+    <PageShell title="Support" description="Respond to landlord tickets and operational issues.">
+      <SectionCard title="Ticket Queue">
+        <p className="text-sm text-slate-600">Manage support tickets and landlord inquiries.</p>
+      </SectionCard>
+    </PageShell>
   );
 }
