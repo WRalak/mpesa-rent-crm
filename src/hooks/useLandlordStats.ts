@@ -64,13 +64,7 @@ export function useLandlordStats() {
   };
 
   useEffect(() => {
-    let mounted = true;
-
     fetchStats();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   const retry = () => {

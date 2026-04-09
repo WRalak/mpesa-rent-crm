@@ -29,38 +29,28 @@ export const authConfig = {
         try {
           const parsed = loginSchema.safeParse(credentials);
           if (!parsed.success) {
-            console.error("Auth validation error:", parsed.error.errors);
             return null;
           }
 
-          const phone = SecurityUtils.sanitizeInput((parsed.data.phone as string).replace(/\D/g, ""));
-          
-          // For now, skip OTP validation in production but keep the structure
-          // In a real implementation, you would validate the OTP here
+          const { phone } = parsed.data;
           const user = await db.user.findUnique({
             where: { phone },
+            select: { id: true, name: true, phone: true, role: true, email: true },
           });
 
           if (!user) {
-            console.warn("Login attempt with non-existent phone:", phone.substring(0, 3) + "***");
-            return null;
-          }
-
-          // Additional security check
-          if (!SecurityUtils.validatePhoneNumber(phone)) {
-            console.error("Invalid phone format after sanitization");
             return null;
           }
 
           return {
             id: user.id,
-            name: user.name ?? "",
-            email: user.email ?? "",
+            name: user.name,
             phone: user.phone,
             role: user.role,
+            email: user.email,
           };
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error("Authorization error:", error);
           return null;
         }
       },

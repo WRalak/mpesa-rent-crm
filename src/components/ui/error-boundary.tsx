@@ -34,8 +34,8 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error("Error Boundary caught an error:", error, errorInfo);
     
     // In production, you would send this to a monitoring service
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'exception', {
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      (window as Record<string, any>).gtag('event', 'exception', {
         description: error.toString(),
         fatal: false,
       });
@@ -59,8 +59,8 @@ export class ErrorBoundary extends Component<Props, State> {
             <h2 className="text-2xl font-bold text-slate-900">
               Something went wrong
             </h2>
-            <p className="text-slate-600">
-              We're sorry, but something unexpected happened. Our team has been notified.
+            <p className="text-sm text-gray-600 mb-4">
+              We&apos;re sorry, but something went wrong.
             </p>
             
             {process.env.NODE_ENV === 'development' && this.state.error && (

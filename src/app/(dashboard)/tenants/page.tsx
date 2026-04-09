@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiGet, apiPost } from "@/services/api-client";
 import type { PropertyDto, TenantDto } from "@/types";
 import { formatCurrency } from "@/utils/formatters";
@@ -11,6 +11,7 @@ type PropertyOption = Pick<PropertyDto, "id" | "name" | "unitCount">;
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<TenantDto[]>([]);
   const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [unitNumber, setUnitNumber] = useState("");
@@ -18,17 +19,29 @@ export default function TenantsPage() {
   const [propertyId, setPropertyId] = useState("");
   const [message, setMessage] = useState("");
 
+  // Load data on component mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
   async function loadData() {
     setMessage("");
+    setLoading(true);
     try {
       const [tenantsData, propertiesData] = await Promise.all([
         apiGet<TenantDto[]>("/api/tenants"),
         apiGet<PropertyOption[]>("/api/properties"),
       ]);
-      setTenants(tenantsData);
-      setProperties(propertiesData);
+      // Ensure we always have arrays
+      setTenants(Array.isArray(tenantsData) ? tenantsData : []);
+      setProperties(Array.isArray(propertiesData) ? propertiesData : []);
     } catch (error) {
+      console.error("Failed to load data:", error);
       setMessage(error instanceof Error ? error.message : "Failed to load tenants.");
+      setTenants([]); // Reset to empty array on error
+      setProperties([]); // Reset to empty array on error
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -86,8 +99,12 @@ export default function TenantsPage() {
       title="Tenants"
       description="Track tenant contacts and monthly rent amounts."
       actions={
-        <button onClick={() => void loadData()} className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50">
-          Refresh
+        <button 
+          onClick={() => void loadData()} 
+          disabled={loading}
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
+        >
+          {loading ? "Loading..." : "Refresh"}
         </button>
       }
     >
@@ -125,7 +142,7 @@ export default function TenantsPage() {
             className="rounded-md border px-3 py-2"
           >
             <option value="">Select property</option>
-            {properties.map((property) => (
+            {Array.isArray(properties) && properties.map((property) => (
               <option key={property.id} value={property.id}>
                 {property.name} ({property.unitCount} units)
               </option>
@@ -146,15 +163,22 @@ export default function TenantsPage() {
       </SectionCard>
 
       <div className="space-y-3">
-        {tenants.map((t) => (
-          <div key={t.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="font-medium">{t.fullName}</p>
-            <p className="text-sm text-gray-600">Unit {t.unitNumber}</p>
-            <p className="text-sm">{t.phone}</p>
-            <p className="text-sm">{formatCurrency(t.rentAmount)}</p>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-900"></div>
           </div>
-        ))}
-        {tenants.length === 0 ? <p className="text-sm text-gray-600">No tenants yet.</p> : null}
+        ) : Array.isArray(tenants) && tenants.length > 0 ? (
+          tenants.map((t) => (
+            <div key={t.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="font-medium">{t.fullName}</p>
+              <p className="text-sm text-gray-600">Unit {t.unitNumber}</p>
+              <p className="text-sm">{t.phone}</p>
+              <p className="text-sm">{formatCurrency(t.rentAmount)}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-gray-600">No tenants yet.</p>
+        )}
       </div>
     </PageShell>
   );

@@ -79,11 +79,14 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  console.log('POST /api/properties called');
+  
   let body: any;
   
   try {
     const rateLimitResult = generalRateLimit.check(request as any);
     if (!rateLimitResult.success) {
+      console.log('Rate limit exceeded');
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { status: 429 }
@@ -91,9 +94,14 @@ export async function POST(request: Request) {
     }
 
     const session = await auth();
+    console.log('Session:', session);
+    
     if (!session?.user?.id) {
+      console.log('Unauthorized - no session or user ID');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
+    console.log('User authenticated:', session.user.id);
 
     try {
       body = await request.json();
@@ -105,6 +113,11 @@ export async function POST(request: Request) {
     }
     
     const validatedData = propertySchema.parse(body) as PropertyInput;
+
+    console.log('Creating property with data:', {
+      ...validatedData,
+      landlordId: session.user.id,
+    });
 
     const property = await db.property.create({
       data: {
@@ -118,6 +131,8 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('Property created successfully:', property);
+
     logger.api('POST', '/api/properties', 201, undefined, {
       userId: session.user.id,
       propertyId: property.id,
@@ -127,6 +142,13 @@ export async function POST(request: Request) {
     return NextResponse.json(property, { status: 201 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Failed to create property:', error);
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      requestBody: body || 'undefined'
+    });
+    
     logger.error('Failed to create property', { 
       error: errorMessage,
       stack: error instanceof Error ? error.stack : undefined,

@@ -1,50 +1,69 @@
-import { signIn } from "@/lib/auth";
-import { AuthError } from "next-auth";
-import Link from "next/link";
+"use client";
+
+import { signIn } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 type LoginPageProps = {
   searchParams: Promise<{ error?: string }>;
 };
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const params = await searchParams;
-  const hasError = params.error === "invalid_credentials";
-  const userNotFound = params.error === "user_not_found";
+export default function LoginPage({ searchParams }: LoginPageProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [phone, setPhone] = useState("");
 
-  async function login(formData: FormData) {
-    "use server";
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get("error");
+    if (errorParam === "invalid_credentials") {
+      setError("Invalid phone number. Please try again.");
+    } else if (errorParam === "user_not_found") {
+      setError("Phone number not found. Use a test user above.");
+    }
+  }, []);
 
-    const phone = String(formData.get("phone") ?? "").replace(/\D/g, "");
-    if (!phone) {
-      redirect("/login?error=invalid_credentials");
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (!cleanPhone) {
+      setError("Please enter a phone number");
+      setLoading(false);
+      return;
     }
 
-    // Check if user exists and get role
     try {
-      const { db } = await import("@/lib/db");
-      const user = await db.user.findUnique({
-        where: { phone },
-        select: { role: true }
+      // Check if user exists first
+      const response = await fetch("/api/auth/check-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: cleanPhone }),
       });
 
-      if (!user) {
-        redirect("/login?error=user_not_found");
+      const userData = await response.json();
+
+      if (!userData.success) {
+        setError(userData.error || "Phone number not found");
+        setLoading(false);
+        return;
       }
 
       // Determine redirect based on role
-      const redirectTo = user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard";
+      const redirectTo = userData.user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard";
 
       await signIn("credentials", {
-        phone,
+        phone: cleanPhone,
         redirectTo,
       });
     } catch (error) {
       console.error("Login error:", error);
-      if (error instanceof AuthError) {
-        redirect("/login?error=invalid_credentials");
-      }
-      redirect("/login?error=invalid_credentials");
+      setError("Login failed. Please try again.");
+      setLoading(false);
     }
   }
 
@@ -53,27 +72,28 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-semibold text-slate-900">Welcome Back</h1>
       <p className="text-sm text-slate-600 mt-1">Enter your phone number to sign in.</p>
-      {hasError ? (
+      {error ? (
         <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          Sign in failed. Please check your phone number and try again.
-        </p>
-      ) : userNotFound ? (
-        <p className="mt-3 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
-          Phone number not found. Use a test user above or create an account.
+          {error}
         </p>
       ) : null}
 
-      <form action={login} className="mt-6 space-y-3">
+      <form onSubmit={login} className="mt-6 space-y-3">
         <input
-          name="phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           type="tel"
           inputMode="numeric"
           placeholder="2547XXXXXXXX"
           className="w-full rounded-lg border border-slate-300 px-3 py-2"
-          required
+          disabled={loading}
         />
-        <button className="w-full rounded-lg bg-slate-900 text-white px-3 py-2 hover:bg-slate-800">
-          Sign In
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-lg bg-slate-900 px-3 py-2 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
       <p className="mt-4 text-sm text-slate-600">

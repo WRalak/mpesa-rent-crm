@@ -5,9 +5,12 @@ const randomBytes = (length: number): Uint8Array => {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     return crypto.getRandomValues(new Uint8Array(length));
   }
-  // Fallback for Node.js environment
-  const { randomBytes: nodeRandomBytes } = require('crypto');
-  return nodeRandomBytes(length);
+  // Fallback if crypto is not available
+  const array = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    array[i] = Math.floor(Math.random() * 256);
+  }
+  return array;
 };
 
 const timingSafeEqual = (a: Buffer | Uint8Array, b: Buffer | Uint8Array): boolean => {

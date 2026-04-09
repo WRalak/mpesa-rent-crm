@@ -22,4 +22,7 @@ export type PropertyDto = {
   name: string;
   location: string;
   unitCount: number;
+  _count?: {
+    tenants: number;
+  };
 };
