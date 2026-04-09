@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ClientCookieManager, COOKIE_NAMES, DEFAULT_PREFERENCES, type UserPreferences } from "@/lib/cookies";
+import { ClientCookieManager, COOKIE_NAMES, DEFAULT_PREFERENCES, type UserPreferences } from "@/lib/cookies-client";
 
 // Cookie hook for client-side usage
 export function useCookies() {

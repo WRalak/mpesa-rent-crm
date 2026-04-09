@@ -7,8 +7,9 @@ import { propertySchema, PropertyInput } from "@/lib/validations";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     const rateLimitResult = generalRateLimit.check(request as any);
     if (!rateLimitResult.success) {
@@ -65,8 +66,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   let body: any;
   
   try {
@@ -147,8 +149,9 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     const rateLimitResult = generalRateLimit.check(request as any);
     if (!rateLimitResult.success) {

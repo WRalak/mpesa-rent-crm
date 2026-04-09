@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
       phoneNumber: phone,
       tenantId: tenant.id,
       landlordId: session.user.id,
+      propertyId: tenant.propertyId,
       status: "PENDING",
     },
   });
